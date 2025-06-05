@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th4 12, 2024 lúc 02:19 PM
+-- Máy chủ: localhost
+-- Thời gian đã tạo: Th6 05, 2025 lúc 08:26 PM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
 -- Phiên bản PHP: 8.2.4
 
@@ -39,7 +39,7 @@ CREATE TABLE `tbl_admin` (
 --
 
 INSERT INTO `tbl_admin` (`admin_id`, `admin_name`, `admin_password`, `admin_User`) VALUES
-(1, 'admin', 'e10adc3949ba59abbe56e057f20f883e', 'Admin'),
+(1, 'admin', 'c4ca4238a0b923820dcc509a6f75849b', 'Admin'),
 (2, 'Admin1', 'cc26cd414f8376f8237027628069cc66', 'john@example.com');
 
 -- --------------------------------------------------------
@@ -83,7 +83,9 @@ CREATE TABLE `tbl_cart` (
 INSERT INTO `tbl_cart` (`cart_id`, `sanpham_anh`, `session_idA`, `sanpham_id`, `sanpham_tieude`, `sanpham_gia`, `color_anh`, `quantitys`, `sanpham_size`) VALUES
 (231, 'admin/uploads/f75ab84935.jpg', '61jrdpk20130a5t4ob0b53mtao', 39, 'ĐẦM LỤA CỔ V TAY RÚT NHÚM', '1990000', 'admin/uploads/d2ded184be.png', 1, 'XL'),
 (243, 'admin/uploads/02b600c039.jpg', 'fek0m42fe0a4tkhuj2pfjd4j3d', 41, 'QUẦN BAGGY DÂY LƯNG THẮT NƠ', '1190000', 'admin/uploads/afdda1fc38.png', 1, 'M'),
-(244, 'admin/uploads/f75ab84935.jpg', 'fek0m42fe0a4tkhuj2pfjd4j3d', 39, 'ĐẦM LỤA CỔ V TAY RÚT NHÚM', '1990000', 'admin/uploads/d2ded184be.png', 1, 'S');
+(244, 'admin/uploads/f75ab84935.jpg', 'fek0m42fe0a4tkhuj2pfjd4j3d', 39, 'ĐẦM LỤA CỔ V TAY RÚT NHÚM', '1990000', 'admin/uploads/d2ded184be.png', 1, 'S'),
+(245, 'admin/uploads/d7aeb39c18.jpg', 'ehvk0ljsv6r2ghc2jcdfmgc6cv', 42, 'ĐẦM DẠO PHỐ DÁNG XÒE XẾP LY', '2190000', 'admin/uploads/afdda1fc38.png', 1, 'XXL'),
+(246, 'admin/uploads/f75ab84935.jpg', 'ehvk0ljsv6r2ghc2jcdfmgc6cv', 39, 'ĐẦM LỤA CỔ V TAY RÚT NHÚM', '1990000', 'admin/uploads/d2ded184be.png', 1, 'XL');
 
 -- --------------------------------------------------------
 
@@ -21496,15 +21498,13 @@ CREATE TABLE `tbl_loaisanpham` (
 --
 
 INSERT INTO `tbl_loaisanpham` (`loaisanpham_id`, `danhmuc_id`, `loaisanpham_ten`) VALUES
-(2, 68, 'áo công sở'),
 (24, 16, 'Áo sơ mi'),
 (27, 16, 'Senora - Đầm dạ hội'),
 (28, 24, 'Áo khoác'),
 (31, 24, 'Áo polo'),
 (36, 67, 'Quần nam trẻ em'),
 (38, 67, ' Váy bé gái '),
-(41, 16, 'Áo croptop'),
-(42, 70, 'ƯU ĐÃI TRONG THÁNG');
+(41, 16, 'Áo croptop');
 
 -- --------------------------------------------------------
 
@@ -21528,15 +21528,15 @@ CREATE TABLE `tbl_payment` (
 --
 
 INSERT INTO `tbl_payment` (`payment_id`, `code_oder`, `session_idA`, `register_id`, `giaohang`, `thanhtoan`, `order_date`, `statusA`) VALUES
-(42, 'huajpbng', 'huajpbng0lqhhshltaimdl9v6s', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2023-07-16', 1),
-(43, 'nhpa4ddl', 'nhpa4ddl6jfmqr8b9a1b3gh4pl', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2023-07-16', 1),
-(44, 'nbrmq6e6', 'nbrmq6e6bi0jiibvobvsmk4cbt', 21, 'Giao hàng chuyển phát nhanh', 'VNPAY', '2023-07-16', 1),
-(45, '4d6n68op', '4d6n68opv5m2emoj58jbo78ju3', 21, 'Giao hàng chuyển phát nhanh', 'VNPAY', '2023-07-16', 0),
-(46, 'nedikjgo', 'nedikjgoto282u3gd39nab1vlh', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2023-07-16', 1),
-(47, 'f8vrffo4', 'f8vrffo4omsfmm6o0ak49gu2hv', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2023-07-16', 1),
-(48, 'lion68bp', 'lion68bpe8tiblg1b5vqol2ana', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2023-09-10', 0),
-(49, 'ol45qr08', 'ol45qr08nm448m6uuejnsvbivv', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2023-09-10', 0),
-(50, 'fek0m42f', 'fek0m42fe0a4tkhuj2pfjd4j3d', 22, 'Giao hàng chuyển phát nhanh', 'tienmat', '2024-04-12', 0);
+(42, 'huajpbng', 'huajpbng0lqhhshltaimdl9v6s', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2025-05-16', 1),
+(43, 'nhpa4ddl', 'nhpa4ddl6jfmqr8b9a1b3gh4pl', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2025-05-15', 1),
+(44, 'nbrmq6e6', 'nbrmq6e6bi0jiibvobvsmk4cbt', 21, 'Giao hàng chuyển phát nhanh', 'VNPAY', '2025-05-16', 1),
+(45, '4d6n68op', '4d6n68opv5m2emoj58jbo78ju3', 21, 'Giao hàng chuyển phát nhanh', 'VNPAY', '2025-05-16', 0),
+(46, 'nedikjgo', 'nedikjgoto282u3gd39nab1vlh', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2025-05-16', 1),
+(47, 'f8vrffo4', 'f8vrffo4omsfmm6o0ak49gu2hv', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2025-05-16', 1),
+(48, 'lion68bp', 'lion68bpe8tiblg1b5vqol2ana', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2025-05-10', 0),
+(49, 'ol45qr08', 'ol45qr08nm448m6uuejnsvbivv', 21, 'Giao hàng chuyển phát nhanh', 'tienmat', '2025-05-10', 0),
+(50, 'fek0m42f', 'fek0m42fe0a4tkhuj2pfjd4j3d', 22, 'Giao hàng chuyển phát nhanh', 'tienmat', '2025-05-12', 0);
 
 -- --------------------------------------------------------
 
@@ -21620,8 +21620,8 @@ CREATE TABLE `tbl_register` (
 --
 
 INSERT INTO `tbl_register` (`id`, `name`, `address`, `customer_tinh`, `customer_huyen`, `customer_xa`, `phone`, `email`, `password`, `re_password`) VALUES
-(21, 'Trần Vũ Hoàng Bân', 'ngõ 379, lương thế vinh, mễ trì, từ liêm, hà nội', '01', '007', '00277', '0962758296', 'huong.fullstack@gmail.com', '202cb962ac59075b964b07152d234b70', '202cb962ac59075b964b07152d234b70'),
-(22, 'Bảo Quốc', 'Nghệ An', '83', '832', '28870', '0984277907', 'user@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 'e10adc3949ba59abbe56e057f20f883e');
+(22, 'Bảo Quốc', 'Nghệ An', '83', '832', '28870', '0984277907', 'user@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', 'e10adc3949ba59abbe56e057f20f883e'),
+(23, 'Ngọc Ma', '23 ngõ 167/37 Tây Sơn', '01', '006', '00214', '0333645212', 'immangoc@gmail.com', 'c4ca4238a0b923820dcc509a6f75849b', 'c4ca4238a0b923820dcc509a6f75849b');
 
 -- --------------------------------------------------------
 
@@ -22306,12 +22306,12 @@ CREATE TABLE `tbl_thongke` (
 --
 
 INSERT INTO `tbl_thongke` (`id_thongke`, `doanhthu`, `donhang`, `date_thongke`, `soluong`) VALUES
-(10, '8870000', 50006, '2023-07-17', 60008),
-(11, '560000', 70800, '2023-05-3', 70000),
-(12, '450000', 65060, '2023-06-12', 40000),
-(13, '500000', 90080, '2023-04-16', 20000),
-(14, '508000', 584000, '2023-02-10', 69000),
-(15, '507090', 590300, '2023-03-21', 67000);
+(10, '887000', 50006, '2025-06-04', 60008),
+(11, '560000', 70800, '2025-05-03', 70000),
+(12, '450000', 65060, '2025-06-01', 40000),
+(13, '500000', 90080, '2025-04-16', 20000),
+(14, '508000', 584000, '2025-02-10', 69000),
+(15, '507090', 590300, '2025-03-21', 67000);
 
 -- --------------------------------------------------------
 
@@ -22485,7 +22485,7 @@ ALTER TABLE `tbl_binhluan`
 -- AUTO_INCREMENT cho bảng `tbl_cart`
 --
 ALTER TABLE `tbl_cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=245;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=247;
 
 --
 -- AUTO_INCREMENT cho bảng `tbl_carta`
@@ -22527,7 +22527,7 @@ ALTER TABLE `tbl_rating`
 -- AUTO_INCREMENT cho bảng `tbl_register`
 --
 ALTER TABLE `tbl_register`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT cho bảng `tbl_sanpham`
@@ -22570,6 +22570,16 @@ ALTER TABLE `tbl_vnpay`
 --
 ALTER TABLE `tbl_wishlist`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- Các ràng buộc cho các bảng đã đổ
+--
+
+--
+-- Các ràng buộc cho bảng `tbl_loaisanpham`
+--
+ALTER TABLE `tbl_loaisanpham`
+  ADD CONSTRAINT `fk_loaisanpham_danhmuc` FOREIGN KEY (`danhmuc_id`) REFERENCES `tbl_danhmuc` (`danhmuc_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
