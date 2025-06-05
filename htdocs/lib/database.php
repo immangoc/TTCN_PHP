@@ -1,75 +1,97 @@
 <?php
-include(__ROOT__.'/config/config.php');
+define('__ROOT__', dirname(dirname(__FILE__))); 
+include (__ROOT__ . '/config/config.php');
 
 class Database {
-    public $host   = DB_HOST;
-    public $user   = DB_USER;
-    public $pass   = DB_PASS;
-    public $dbname = DB_NAME;
-    public $link;
-    public $error;
- 
+    private $host = DB_HOST;
+    private $user = DB_USER;
+    private $pass = DB_PASS;
+    private $dbname = DB_NAME;
+    public $link; // Thuộc tính kết nối
+    private $error;
+
     public function __construct() {
         $this->connectDB();
     }
- 
+
     private function connectDB() {
-        $this->link = new mysqli($this->host, $this->user, $this->pass, $this->dbname);
-        
-        if ($this->link->connect_error) {
-            $this->error = "Connection failed: " . $this->link->connect_error;
-            return false;
+        try {
+            $this->link = new mysqli($this->host, $this->user, $this->pass, $this->dbname);
+            if ($this->link->connect_error) {
+                throw new Exception("Kết nối cơ sở dữ liệu thất bại: " . $this->link->connect_error);
+            }
+            // Đặt charset UTF-8 để hỗ trợ tiếng Việt
+            $this->link->set_charset("utf8");
+        } catch (Exception $e) {
+            $this->error = $e->getMessage();
+            // Ghi log lỗi trong môi trường sản xuất
+            error_log($this->error, 3, __ROOT__ . '/logs/error.log');
+            die("Lỗi kết nối cơ sở dữ liệu.");
         }
-        
-        // Set charset to UTF-8 by default for all connections
-        $this->link->set_charset("utf8");
-        return true;
-    }
- 
-    // Select or Read data
-    public function select($query) {
-        $result = $this->link->query($query);
-        if (!$result) {
-            $this->error = $this->link->error . " (Line: " . __LINE__ . ")";
-            return false;
-        }
-        return ($result->num_rows > 0) ? $result : false;
     }
 
-    // Select with UTF-8 charset (redundant now as charset is set in connectDB)
-    public function selectdc($query) {
-        return $this->select($query);
+    // Select or Read data
+    public function select($query) {
+        try {
+            $result = $this->link->query($query);
+            if (!$result) {
+                throw new Exception("Lỗi truy vấn: " . $this->link->error);
+            }
+            return $result->num_rows > 0 ? $result : false;
+        } catch (Exception $e) {
+            error_log($e->getMessage(), 3, __ROOT__ . '/logs/error.log');
+            return false;
+        }
     }
 
     // Insert data
     public function insert($query) {
-        $insert_row = $this->link->query($query);
-        if (!$insert_row) {
-            $this->error = $this->link->error . " (Line: " . __LINE__ . ")";
+        try {
+            $result = $this->link->query($query);
+            if (!$result) {
+                throw new Exception("Lỗi chèn dữ liệu: " . $this->link->error);
+            }
+            return $result;
+        } catch (Exception $e) {
+            error_log($e->getMessage(), 3, __ROOT__ . '/logs/error.log');
+            return false;
         }
-        return $insert_row;
-    }
-  
-    // Update data
-    public function update($query) {
-        $update_row = $this->link->query($query);
-        if (!$update_row) {
-            $this->error = $this->link->error . " (Line: " . __LINE__ . ")";
-        }
-        return $update_row;
-    }
-  
-    // Delete data
-    public function delete($query) {
-        $delete_row = $this->link->query($query);
-        if (!$delete_row) {
-            $this->error = $this->link->error . " (Line: " . __LINE__ . ")";
-        }
-        return $delete_row;
     }
 
-    // Escape string to prevent SQL injection
-    public function escape($str) {
-        return $this->link->real_escape_string($str);
+    // Update data
+    public function update($query) {
+        try {
+            $this->link->set_charset("utf8"); // Đặt charset trước khi update
+            $result = $this->link->query($query);
+            if (!$result) {
+                throw new Exception("Lỗi cập nhật dữ liệu: " . $this->link->error);
+            }
+            return $result;
+        } catch (Exception $e) {
+            error_log($e->getMessage(), 3, __ROOT__ . '/logs/error.log');
+            return false;
+        }
+    }
+
+    // Delete data
+    public function delete($query) {
+        try {
+            $result = $this->link->query($query);
+            if (!$result) {
+                throw new Exception("Lỗi xóa dữ liệu: " . $this->link->error);
+            }
+            return $result;
+        } catch (Exception $e) {
+            error_log($e->getMessage(), 3, __ROOT__ . '/logs/error.log');
+            return false;
+        }
+    }
+
+    // Đóng kết nối (tùy chọn)
+    public function __destruct() {
+        if ($this->link) {
+            $this->link->close();
+        }
     }
 }
+?>

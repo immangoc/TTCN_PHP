@@ -8,7 +8,7 @@ $admin = new admin();
 ?>
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = filter_var($_POST['username'], FILTER_SANITIZE_STRING);
+    $username = htmlspecialchars($_POST['username'], ENT_QUOTES, 'UTF-8');
     $userpassword = md5($_POST['password']); // Lưu ý: MD5 không an toàn, cân nhắc dùng password_hash()
     $check_admin = $admin->check_admin($username, $userpassword);
 }
