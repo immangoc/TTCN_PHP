@@ -94,7 +94,7 @@
                                         <div class="home-product-item_sold">0 đã bán</div>
                                     </div>
                                     <div class="home-product-item_origin">
-                                         <span class="home-product-item_brand">36FULLZ</span>
+                                         <span class="home-product-item_brand">TEECLUB</span>
                                         <span class="home-product-item_origin-name">Hà Nội</span> 
                                     </div>
                                     <div class="home-product-item_favourite">
