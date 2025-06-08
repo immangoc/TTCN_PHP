@@ -1,8 +1,9 @@
 <?php
 @ob_start();
 session_start();
-$session_id = session_id();
 
+$session_id = session_id();
+//Lấy ID phiên duy nhất của người dùng hiện tại, được sử dụng để liên kết giỏ hàng với người dùng.
 ?>
 
 <?php

@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 include "../lib/database.php";
 require ('../Carbon/autoload.php');
 use Carbon\Carbon;
@@ -28,12 +32,13 @@ $days_map = [
 $subdays = Carbon::now('Asia/Ho_Chi_Minh')->subDays($days_map[$thoigian])->toDateString();
 $now = Carbon::now('Asia/Ho_Chi_Minh')->toDateString();
 
-// Truy vấn sử dụng prepared statement
+// Truy vấn sử dụng prepared statement, chỉ lấy các ngày có doanhthu > 0
 $query = "SELECT date_thongke, donhang, doanhthu, soluong 
           FROM tbl_thongke 
           WHERE date_thongke BETWEEN ? AND ? 
+          AND doanhthu > 0 
           ORDER BY date_thongke ASC";
-$stmt = $db->link->prepare($query); // Thay $conn thành $link
+$stmt = $db->link->prepare($query);
 $stmt->bind_param("ss", $subdays, $now);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -48,9 +53,12 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
+// Log để debug
+error_log("Thời gian: $thoigian, Từ: $subdays, Đến: $now, Số bản ghi: " . count($chart_data), 3, "debug.log");
+
 // Trả về dữ liệu JSON
 if (empty($chart_data)) {
-    echo json_encode(['error' => 'Không có dữ liệu thống kê cho khoảng thời gian này']);
+    echo json_encode(['error' => 'Không có dữ liệu thống kê doanh thu trong khoảng thời gian này']);
 } else {
     echo json_encode($chart_data);
 }

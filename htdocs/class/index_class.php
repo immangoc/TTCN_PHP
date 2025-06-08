@@ -338,9 +338,9 @@ public function show_diachi_px($quan_huyen_id){
             $result = $this ->db ->insert($query);
             if($result){
 
-                $title = "Cửa hàng bán quần áo tại Website 36FULLZ Bạn đã đặt hàng thành công!";
+                $title = "Cửa hàng bán quần áo tại Website TEECLUB Bạn đã đặt hàng thành công!";
 		        $content = "<p style=font-size: 18px;>Cảm ơn quý khách đã đặt hàng của chúng tôi với mã đơn hàng : <span style=font-size: 20px; color: #378000;>".$code_oder."</span></p>";
-		        $content.="<h4>Cửa hàng bán quần áo tại Website 36FULLZ sẽ lên đơn hàng cho bạn và giao hàng sớm nhất.Thank you for visiting our store.</h4p>";
+		        $content.="<h4>Cửa hàng bán quần áo tại Website TEECLUB sẽ lên đơn hàng cho bạn và giao hàng sớm nhất.Thank you for visiting our store.</h4p>";
                 $addressMail =  Session::get('register_email');
 		        $mail = new Mailer();
 		        $mail->sendMail($title, $content, $addressMail);

@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
                             <a href="" class="pagination-item_link">1</a>
                         </li>
                         <li class="pagination-item">
-                            <a href="" class="pagination-item_link">2</a>
+                            <a href="#" class="pagination-item_link">2</a>
                         </li>
                         <li class="pagination-item">
                             <a href="" class="pagination-item_link">3</a>
