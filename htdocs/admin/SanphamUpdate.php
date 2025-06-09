@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                         <?php if (isset($update_product)): ?>
                             <div class="error-message"><?php echo htmlspecialchars($update_product); ?></div>
                         <?php endif; ?>
-                        <form action="Sanphamedit.php" method="POST" enctype="multipart/form-data">
+                        <form action="SanphamUpdate.php" method="POST" enctype="multipart/form-data">
                             <div class="product-add-content">
                                 <div class="section-title">Thông tin cơ bản</div>
                                 <div class="row">

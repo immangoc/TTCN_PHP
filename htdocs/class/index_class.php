@@ -122,43 +122,78 @@
     }
 
     //   ======== Mua hàng ========= 
-    public function insert_cart($sanpham_anh,$session_idA,$sanpham_id,$sanpham_tieude,$sanpham_gia,$color_anh,$quantitys,$sanpham_size)
-    {
-        $query = "INSERT INTO tbl_cart (sanpham_anh,session_idA,sanpham_id,sanpham_tieude,sanpham_gia,color_anh,quantitys,sanpham_size) VALUES 
-        ('$sanpham_anh','$session_idA','$sanpham_id','$sanpham_tieude','$sanpham_gia','$color_anh','$quantitys','$sanpham_size')";
-        $result = $this ->db ->insert($query);
-        return $result;  
-     
+   public function insert_cart($sanpham_anh, $session_idA, $sanpham_id, $sanpham_tieude, $sanpham_gia, $color_anh, $quantitys, $sanpham_size) {
+    $query = "INSERT INTO tbl_cart (sanpham_anh, session_idA, sanpham_id, sanpham_tieude, sanpham_gia, color_anh, quantitys, sanpham_size) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $this->db->link->prepare($query);
+    $stmt->bind_param("ssisssss", $sanpham_anh, $session_idA, $sanpham_id, $sanpham_tieude, $sanpham_gia, $color_anh, $quantitys, $sanpham_size);
+    $result = $stmt->execute();
+    if ($result) {
+        $redis = new Redis();
+        $redis->connect('127.0.0.1', 6379);
+        $cacheKey = "cart:$session_idA";
+        $redis->del($cacheKey); // Xóa cache để cập nhật
     }
-
-    //  ========= Hiện ra trang giỏ hàng ============
-    public function show_cart($session_id){
-        $query = "SELECT * FROM tbl_cart WHERE session_idA = '$session_id' ORDER BY cart_id DESC";
-        $result = $this -> db ->select($query);
-        return $result;
-    }
-
-    //  ========= Xóa giỏ hàng ===========
-    public function delete_cart($cart_id){
-        $query = "DELETE  FROM tbl_cart WHERE cart_id = '$cart_id'";
-        $result = $this -> db ->delete($query);
-        if($result){  
-            $query = "SELECT * FROM tbl_cart ORDER BY cart_id";
-            $resultA = $this -> db ->select($query);
-            if($resultA==null){
-                Session::set('SL',null);
-            }
-
-        }
-        return $result;
-}
-
-public function del_data_cart(){
-    $session_idA = session_id();
-    $query = "DELETE  FROM tbl_cart WHERE session_idA = '$session_idA'";
-    $result = $this -> db ->select($query);
     return $result;
 }
+
+    //  ========= Hiện ra trang giỏ hàng ============
+    public function show_cart($session_id) {
+    $redis = new Redis();
+    $redis->connect('127.0.0.1', 6379); // Kết nối Redis
+    $cacheKey = "cart:$session_id";
+    if ($redis->exists($cacheKey)) {
+        return json_decode($redis->get($cacheKey), true); // Lấy từ Redis
+    }
+    $query = "SELECT * FROM tbl_cart WHERE session_idA = ? ORDER BY cart_id DESC";
+    $stmt = $this->db->link->prepare($query);
+    $stmt->bind_param("s", $session_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $data = $result->fetch_all(MYSQLI_ASSOC);
+        $redis->setex($cacheKey, 1800, json_encode($data)); // Lưu vào Redis, TTL 30 phút
+        return $data;
+    }
+    return null;
+}
+
+    //  ========= Xóa giỏ hàng ===========
+    public function delete_cart($cart_id) {
+        $query = "DELETE FROM tbl_cart WHERE cart_id = ?";
+        $stmt = $this->db->link->prepare($query);
+        $stmt->bind_param("i", $cart_id);
+        $result = $stmt->execute();
+        if ($result) {
+            $redis = new Redis();
+            $redis->connect('127.0.0.1', 6379);
+            $session_id = session_id();
+            $redis->del("cart:$session_id"); // Xóa cache
+            $query = "SELECT * FROM tbl_cart WHERE session_idA = ? ORDER BY cart_id";
+            $stmt = $this->db->link->prepare($query);
+            $stmt->bind_param("s", $session_id);
+            $stmt->execute();
+            $resultA = $stmt->get_result();
+            if ($resultA->num_rows == 0) {
+                Session::set('SL', null);
+            }
+        }
+        return $result;
+    }
+
+public function del_data_cart() {
+        $session_idA = session_id();
+        $query = "DELETE FROM tbl_cart WHERE session_idA = ?";
+        $stmt = $this->db->link->prepare($query);
+        $stmt->bind_param("s", $session_idA);
+        $result = $stmt->execute();
+        if ($result) {
+            $redis = new Redis();
+            $redis->connect('127.0.0.1', 6379);
+            $redis->del("cart:$session_idA"); // Xóa cache
+        }
+        return $result;
+    }
 
 public function show_cartF($session_id){
     $query = "SELECT * FROM tbl_cart WHERE session_idA = '$session_id' ORDER BY cart_id DESC";
@@ -305,75 +340,75 @@ public function show_diachi_px($quan_huyen_id){
         return $result;
     }
 
-    public function insert_payment($register_id,$code_oder,$session_idA,$deliver_method,$method_payment,$today) {
-        $query = "SELECT * FROM tbl_payment WHERE session_idA = '$session_idA' ORDER BY payment_id DESC";
-        $result = $this -> db ->select($query);
-        if($result==null) {
-            $query = "SELECT * FROM tbl_cart WHERE session_idA = '$session_idA' ORDER BY cart_id DESC";
-            $resultA = $this -> db ->select($query);
-            if($resultA){while($resultB=$resultA->fetch_assoc()){
-            $cart_id = $resultB['cart_id'];
-            $sanpham_anh = $resultB['sanpham_anh'];
-            $sanpham_id = $resultB['sanpham_id'];
-            $sanpham_tieude = $resultB['sanpham_tieude'];
-            $sanpham_gia = $resultB['sanpham_gia'];
-            $color_anh = $resultB['color_anh'];
-            $quantitys = $resultB['quantitys'];
-            $sanpham_size = $resultB['sanpham_size'];
-            $query = "INSERT INTO tbl_carta (sanpham_anh,session_idA,sanpham_id,sanpham_tieude,sanpham_gia,color_anh,quantitys,sanpham_size) VALUES 
-             ('$sanpham_anh','$session_idA','$sanpham_id','$sanpham_tieude','$sanpham_gia','$color_anh','$quantitys','$sanpham_size')";
-             $resultC= $this ->db ->insert($query);
-             if($resultC){
-                $query = "DELETE  FROM tbl_cart WHERE cart_id = '$cart_id'";
-                $resultD = $this -> db ->delete($query);
-                Session::set('SL',null);
-            //    return $resultB;  
-             }
-            
+    // Thêm đơn hàng
+    public function insert_payment($register_id, $code_oder, $session_idA, $deliver_method, $method_payment, $today) {
+        $register_id = (int)$register_id;
+        $code_oder = mysqli_real_escape_string($this->db->link, $code_oder);
+        $session_idA = mysqli_real_escape_string($this->db->link, $session_idA);
+        $deliver_method = mysqli_real_escape_string($this->db->link, $deliver_method);
+        $method_payment = mysqli_real_escape_string($this->db->link, $method_payment);
+        $today = mysqli_real_escape_string($this->db->link, $today);
 
-             }} 
-       
-            $query = "INSERT INTO tbl_payment (register_id,session_idA,giaohang,thanhtoan,order_date,code_oder) VALUES 
-            ('$register_id','$session_idA','$deliver_method','$method_payment','$today','$code_oder')";
-            $result = $this ->db ->insert($query);
-            if($result){
-
-                $title = "Cửa hàng bán quần áo tại Website TEECLUB Bạn đã đặt hàng thành công!";
-		        $content = "<p style=font-size: 18px;>Cảm ơn quý khách đã đặt hàng của chúng tôi với mã đơn hàng : <span style=font-size: 20px; color: #378000;>".$code_oder."</span></p>";
-		        $content.="<h4>Cửa hàng bán quần áo tại Website TEECLUB sẽ lên đơn hàng cho bạn và giao hàng sớm nhất.Thank you for visiting our store.</h4p>";
-                $addressMail =  Session::get('register_email');
-		        $mail = new Mailer();
-		        $mail->sendMail($title, $content, $addressMail);
-            
-                return $result; 
-            }
-            header('Location:success.php');
-        }else {
-            $query = "SELECT * FROM tbl_cart WHERE session_idA = '$session_idA' ORDER BY cart_id DESC";
-            $resultA = $this -> db ->select($query);
-            if($resultA){while($resultB=$resultA->fetch_assoc()){
-            $cart_id = $resultB['cart_id'];
-            $sanpham_anh = $resultB['sanpham_anh'];
-            $sanpham_id = $resultB['sanpham_id'];
-            $sanpham_tieude = $resultB['sanpham_tieude'];
-            $sanpham_gia = $resultB['sanpham_gia'];
-            $color_anh = $resultB['color_anh'];
-            $quantitys = $resultB['quantitys'];
-            $sanpham_size = $resultB['sanpham_size'];
-            $query = "INSERT INTO tbl_carta (sanpham_anh,session_idA,sanpham_id,sanpham_tieude,sanpham_gia,color_anh,quantitys,sanpham_size) VALUES 
-             ('$sanpham_anh','$session_idA','$sanpham_id','$sanpham_tieude','$sanpham_gia','$color_anh','$quantitys','$sanpham_size')";
-             $resultC= $this ->db ->insert($query);
-             if($resultC){
-                $query = "DELETE  FROM tbl_cart WHERE cart_id = '$cart_id'";
-                $resultD = $this -> db ->delete($query);
-                Session::set('SL',null);
-            //    return $resultB;  
-             }
-            
-
-             }} 
-            header('Location:success.php');
+        // Kiểm tra giỏ hàng
+        $query = "SELECT * FROM tbl_cart WHERE session_idA = '$session_idA' ORDER BY cart_id DESC";
+        $resultA = $this->db->select($query);
+        if (!$resultA || $resultA->num_rows == 0) {
+            return false; // Giỏ hàng rỗng
         }
+
+        // Chuyển dữ liệu từ tbl_cart sang tbl_carta
+        $success = true;
+        while ($resultB = $resultA->fetch_assoc()) {
+            $cart_id = (int)$resultB['cart_id'];
+            $sanpham_anh = mysqli_real_escape_string($this->db->link, $resultB['sanpham_anh']);
+            $sanpham_id = (int)$resultB['sanpham_id'];
+            $sanpham_tieude = mysqli_real_escape_string($this->db->link, $resultB['sanpham_tieude']);
+            $sanpham_gia = mysqli_real_escape_string($this->db->link, $resultB['sanpham_gia']);
+            $color_anh = mysqli_real_escape_string($this->db->link, $resultB['color_anh']);
+            $quantitys = (int)$resultB['quantitys'];
+            $sanpham_size = mysqli_real_escape_string($this->db->link, $resultB['sanpham_size']);
+
+            $query = "INSERT INTO tbl_carta (sanpham_anh, session_idA, sanpham_id, sanpham_tieude, sanpham_gia, color_anh, quantitys, sanpham_size) 
+                      VALUES ('$sanpham_anh', '$session_idA', '$sanpham_id', '$sanpham_tieude', '$sanpham_gia', '$color_anh', '$quantitys', '$sanpham_size')";
+            $resultC = $this->db->insert($query);
+            if ($resultC) {
+                $query = "DELETE FROM tbl_cart WHERE cart_id = '$cart_id'";
+                $resultD = $this->db->delete($query);
+                if (!$resultD) {
+                    $success = false;
+                }
+            } else {
+                $success = false;
+            }
+        }
+
+        // Thêm vào tbl_payment
+        if ($success) {
+            $query = "INSERT INTO tbl_payment (register_id, session_idA, giaohang, thanhtoan, order_date, code_oder) 
+                      VALUES ('$register_id', '$session_idA', '$deliver_method', '$method_payment', '$today', '$code_oder')";
+            $result = $this->db->insert($query);
+            if ($result) {
+                // Gửi email
+                $title = "Cửa hàng bán quần áo tại Website TEECLUB Bạn đã đặt hàng thành công!";
+                $content = "<p style='font-size: 18px;'>Cảm ơn quý khách đã đặt hàng của chúng tôi với mã đơn hàng: <span style='font-size: 20px; color: #378000;'>$code_oder</span></p>";
+                $content .= "<h4>Cửa hàng bán quần áo tại Website TEECLUB sẽ lên đơn hàng cho bạn và giao hàng sớm nhất. Thank you for visiting our store.</h4>";
+                $addressMail = Session::get('register_email');
+                $mail = new Mailer();
+                $mail->sendMail($title, $content, $addressMail);
+
+                // Xóa cache Redis và session
+                $redis = new Redis();
+                $redis->connect('127.0.0.1', 6379);
+                $redis->del("cart:$session_idA");
+                Session::set('SL', null);
+                Session::set('TT', null);
+
+                header('Location: success.php');
+                exit();
+                return true;
+            }
+        }
+        return false;
     }
 
 
