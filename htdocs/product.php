@@ -47,6 +47,7 @@ if ($get_sanpham && $get_sanpham->num_rows > 0) {
             $get_sanpham = $index->get_sanpham($sanpham_id);
             if ($get_sanpham) {
                 while ($result = $get_sanpham->fetch_assoc()) {
+                    $is_out_of_stock = $result['soluong'] == 0;
             ?>
             <div class="product-content-left git">
                 <div class="product-content-left-big-img">
@@ -171,16 +172,19 @@ if ($get_sanpham && $get_sanpham->num_rows > 0) {
                     <div class="quantity">
                         <p style="font-weight: bold">Số lượng: </p>
                         <input class="soluong_sp" type="hidden" value="<?php echo $result['soluong'] ?>">
-                        <input class="quantitys" type="number" min="0" value="1">
+                        <input class="quantitys" type="number" min="1" max="<?php echo $result['soluong'] ?>" value="1" <?php echo $is_out_of_stock ? 'disabled' : '' ?>>
+                        <p style="font-weight: bold; margin-left: 10px;">Tồn kho: <?php echo $result['soluong'] ?></p>
                     </div>
-                    <p class="alert_soluong" style="color: red;"></p>
+                    <?php if ($is_out_of_stock) { ?>
+                        <p class="alert_soluong" style="color: red;">Sản phẩm đã hết hàng!</p>
+                    <?php } ?>
                     <p class="size-alert" style="color: red;"></p>
                 </div>
                 <div class="product-content-right-product-button">
-                    <button class="add-cart-btn" data-action="add-to-cart">
+                    <button class="add-cart-btn" data-action="add-to-cart" <?php echo $is_out_of_stock ? 'disabled' : '' ?>>
                         <i class="fas fa-shopping-cart"></i> <p>THÊM GIỎ HÀNG</p>
                     </button>
-                    <button class="buy-now-btn" data-action="buy-now">
+                    <button class="buy-now-btn" data-action="buy-now" <?php echo $is_out_of_stock ? 'disabled' : '' ?>>
                         <p>MUA HÀNG</p>
                     </button>
                     <form action="" method="POST">
@@ -470,11 +474,6 @@ $(document).ready(function() {
     });
 
     function addToCart(button, redirect = false) {
-        if (!selectedSize) {
-            $('.size-alert').text('Vui lòng chọn size*');
-            return;
-        }
-
         var $parent = button.closest('.product-content-right');
         var session_id = $parent.find('.session_id').val();
         var sanpham_id = $parent.find('.sanpham_id').val();
@@ -485,13 +484,26 @@ $(document).ready(function() {
         var quantity = $parent.find('.quantitys').val();
         var soluong_sp = $parent.find('.soluong_sp').val();
 
+        // Kiểm tra nếu hết hàng
+        if (parseInt(soluong_sp) === 0) {
+            $('.alert_soluong').text('Sản phẩm đã hết hàng!');
+            return;
+        }
+
+        // Kiểm tra chọn size
+        if (!selectedSize) {
+            $('.size-alert').text('Vui lòng chọn size*');
+            return;
+        }
+
+        // Kiểm tra số lượng
         if (parseInt(quantity) <= 0) {
             $('.alert_soluong').text('Số lượng phải lớn hơn 0*');
             return;
         }
 
         if (parseInt(quantity) > parseInt(soluong_sp)) {
-            $('.alert_soluong').text('Số lượng đặt hàng phải nhỏ hơn số lượng tồn kho*');
+            $('.alert_soluong').text('Số lượng đặt hàng phải nhỏ hơn hoặc bằng số lượng tồn kho*');
             return;
         }
 
