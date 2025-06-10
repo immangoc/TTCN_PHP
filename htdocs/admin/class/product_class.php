@@ -112,88 +112,127 @@ include "lib/database.php";
         return $result;
     }
 
-    public function update_product($data,$file,$sanpham_id ) {
-        $sanpham_tieude = $data['sanpham_tieude'];
-        $sanpham_ma = $data['sanpham_ma'];
-        $danhmuc_id = $data['danhmuc_id'];
-        $loaisanpham_id = $data['loaisanpham_id'];
-        $color_id = $data['color_id'];
-        $giamgia = $data['giamgia'];
-        $sanpham_gia = $data['sanpham_gia'];
-        $soluong = $data['soluong'];
-        $tinhtrang = $data['tinhtrang'];
-        $sanpham_host = $data['sanpham_host'];
-        $sapxepsp = $data['sapxepsp'];
-        $sanpham_gioithieu = $data['sanpham_gioithieu'];
-        $sanpham_chitiet = $data['sanpham_chitiet'];
-        $sanpham_baoquan = $data['sanpham_baoquan'];
-        $file_name = $_FILES['sanpham_anh']['name'];
-        $file_size = $_FILES['sanpham_anh']['size'];
-        $file_temp = $_FILES['sanpham_anh']['tmp_name'];
-        $filenames = $_FILES['sanpham_anhs']['name'] ;
-        $filetmps =  $_FILES['sanpham_anhs']['tmp_name'] ;
-        $div = explode('.',$file_name);
-        $file_ext = strtolower(end($div));
-        $sanpham_anh = substr(md5(time()),0,10).'.'.$file_ext;
-        $upload_image = "uploads/".$sanpham_anh;
-        move_uploaded_file( $file_temp,$upload_image);
-        if(!empty($file_name)&& !empty($filenames))
-        {
-            $query = "UPDATE tbl_sanpham SET                            
-            sanpham_tieude = '$sanpham_tieude', 
-            sanpham_ma = '$sanpham_ma', 
-            danhmuc_id = '$danhmuc_id', 
-            loaisanpham_id = '$loaisanpham_id', 
-            color_id = '$color_id', 
-            giamgia = '$giamgia',
-            sanpham_gia = '$sanpham_gia',
-            soluong = '$soluong',
-            tinhtrang = '$tinhtrang',
-            sanpham_host = '$sanpham_host',
-            sapxepsp = '$sapxepsp',
-            sanpham_gioithieu = '$sanpham_gioithieu',
-            sanpham_chitiet = '$sanpham_chitiet',
-            sanpham_baoquan = '$sanpham_baoquan',
-            sanpham_anh = '$sanpham_anh'
-            WHERE sanpham_id = '$sanpham_id'";
-            $result = $this ->db ->update($query);
-            if($result ) {
-                $query = "DELETE  FROM tbl_sanpham_anh WHERE sanpham_id = '$sanpham_id'";
-                $result = $this -> db ->delete($query);
-                foreach ($filenames as $key => $element) {
-                        move_uploaded_file( $filetmps[$key],"uploads/".$element);
-                        $query = "INSERT INTO tbl_sanpham_anh (sanpham_id,sanpham_anh) VALUES ('$sanpham_id','$element')";
-                        $result = $this -> db ->insert($query);
+   public function update_product($data, $files, $sanpham_id) {
+    // Lấy dữ liệu từ form
+    $sanpham_tieude = mysqli_real_escape_string($this->db->link, $data['sanpham_tieude']);
+    $sanpham_ma = mysqli_real_escape_string($this->db->link, $data['sanpham_ma']);
+    $danhmuc_id = (int)$data['danhmuc_id'];
+    $loaisanpham_id = (int)$data['loaisanpham_id'];
+    $color_id = (int)$data['color_id'];
+    $giamgia = (float)$data['giamgia'];
+    $sanpham_gia = (float)$data['sanpham_gia'];
+    $soluong = (int)$data['soluong'];
+    $tinhtrang = (int)$data['tinhtrang'];
+    $sanpham_host = (int)$data['sanpham_host'];
+    $sapxepsp = (int)$data['sapxepsp'];
+    $sanpham_gioithieu = mysqli_real_escape_string($this->db->link, $data['sanpham_gioithieu']);
+    $sanpham_chitiet = mysqli_real_escape_string($this->db->link, $data['sanpham_chitiet']);
+    $sanpham_baoquan = mysqli_real_escape_string($this->db->link, $data['sanpham_baoquan']);
+    $sanpham_size = isset($data['sanpham-size']) ? $data['sanpham-size'] : [];
+
+    // Kiểm tra dữ liệu bắt buộc
+    if (empty($sanpham_tieude) || empty($sanpham_ma) || empty($sanpham_gia) || empty($soluong)) {
+        return "Vui lòng điền đầy đủ các trường bắt buộc.";
+    }
+
+    // Xử lý ảnh đại diện
+    $sanpham_anh = '';
+    if (!empty($files['sanpham_anh']['name'])) {
+        $file_name = $files['sanpham_anh']['name'];
+        $file_temp = $files['sanpham_anh']['tmp_name'];
+        $file_error = $files['sanpham_anh']['error'];
+
+        if ($file_error === UPLOAD_ERR_OK) {
+            $div = explode('.', $file_name);
+            $file_ext = strtolower(end($div));
+            $allowed_ext = ['jpg', 'jpeg', 'png', 'gif'];
+            if (in_array($file_ext, $allowed_ext)) {
+                $sanpham_anh = substr(md5(time()), 0, 10) . '.' . $file_ext;
+                $upload_image = "uploads/" . $sanpham_anh;
+                if (!move_uploaded_file($file_temp, $upload_image)) {
+                    return "Lỗi khi tải lên ảnh đại diện.";
+                }
+            } else {
+                return "Định dạng ảnh không hợp lệ.";
+            }
+        } else {
+            return "Lỗi tải lên ảnh đại diện: " . $file_error;
+        }
+    }
+
+    // Bắt đầu xây dựng câu lệnh SQL
+    $query = "UPDATE tbl_sanpham SET 
+        sanpham_tieude = '$sanpham_tieude', 
+        sanpham_ma = '$sanpham_ma', 
+        danhmuc_id = '$danhmuc_id', 
+        loaisanpham_id = '$loaisanpham_id', 
+        color_id = '$color_id', 
+        giamgia = '$giamgia',
+        sanpham_gia = '$sanpham_gia',
+        soluong = '$soluong',
+        tinhtrang = '$tinhtrang',
+        sanpham_host = '$sanpham_host',
+        sapxepsp = '$sapxepsp',
+        sanpham_gioithieu = '$sanpham_gioithieu',
+        sanpham_chitiet = '$sanpham_chitiet',
+        sanpham_baoquan = '$sanpham_baoquan'";
+
+    // Nếu có ảnh mới, cập nhật ảnh
+    if ($sanpham_anh) {
+        $query .= ", sanpham_anh = '$sanpham_anh'";
+    }
+
+    $query .= " WHERE sanpham_id = '$sanpham_id'";
+    $result = $this->db->update($query);
+
+    if (!$result) {
+        return "Lỗi cập nhật sản phẩm: " . mysqli_error($this->db->link);
+    }
+
+    // Xử lý ảnh mô tả
+    if (!empty($files['sanpham_anhs']['name'][0])) {
+        // Xóa ảnh mô tả cũ
+        $query = "DELETE FROM tbl_sanpham_anh WHERE sanpham_id = '$sanpham_id'";
+        $this->db->delete($query);
+
+        // Thêm ảnh mô tả mới
+        $filenames = $files['sanpham_anhs']['name'];
+        $filetmps = $files['sanpham_anhs']['tmp_name'];
+        $fileerrors = $files['sanpham_anhs']['error'];
+
+        foreach ($filenames as $key => $filename) {
+            if ($fileerrors[$key] === UPLOAD_ERR_OK && !empty($filename)) {
+                $div = explode('.', $filename);
+                $file_ext = strtolower(end($div));
+                $allowed_ext = ['jpg', 'jpeg', 'png', 'gif'];
+                if (in_array($file_ext, $allowed_ext)) {
+                    $new_filename = substr(md5(time() . $key), 0, 10) . '.' . $file_ext;
+                    $upload_image = "uploads/" . $new_filename;
+                    if (move_uploaded_file($filetmps[$key], $upload_image)) {
+                        $query = "INSERT INTO tbl_sanpham_anh (sanpham_id, sanpham_anh) VALUES ('$sanpham_id', '$new_filename')";
+                        $this->db->insert($query);
                     }
-                 }
-              header('Location:Sanphamlist.php');
-              return $result; 
-         
-              }   
-        else {
-                $query = "UPDATE tbl_sanpham SET                            
-                sanpham_tieude = '$sanpham_tieude', 
-                sanpham_ma = '$sanpham_ma', 
-                danhmuc_id = '$danhmuc_id', 
-                loaisanpham_id = '$loaisanpham_id', 
-                color_id = '$color_id', 
-                giamgia = '$giamgia',
-                sanpham_gia = '$sanpham_gia',
-                soluong = '$soluong',
-                tinhtrang = '$tinhtrang',
-                sanpham_host = '$sanpham_host',
-                sapxepsp = '$sapxepsp,
-                sanpham_gioithieu = '$sanpham_gioithieu',
-                sanpham_chitiet = '$sanpham_chitiet',
-                sanpham_baoquan = '$sanpham_baoquan'
-                WHERE sanpham_id = '$sanpham_id'";
-                $result = $this ->db ->update($query);
-                header('Location:Sanphamlist.php');
-                return $result; 
+                }
+            }
         }
+    }
 
+    // Xử lý kích thước sản phẩm
+    if (!empty($sanpham_size)) {
+        // Xóa kích thước cũ
+        $query = "DELETE FROM tbl_sanpham_size WHERE sanpham_id = '$sanpham_id'";
+        $this->db->delete($query);
 
+        // Thêm kích thước mới
+        foreach ($sanpham_size as $size) {
+            $size = mysqli_real_escape_string($this->db->link, $size);
+            $query = "INSERT INTO tbl_sanpham_size (sanpham_id, sanpham_size) VALUES ('$sanpham_id', '$size')";
+            $this->db->insert($query);
         }
+    }
+
+    return true;
+}
     
     // ==========================================================================
 
