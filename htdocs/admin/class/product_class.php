@@ -182,7 +182,7 @@ include "lib/database.php";
                 soluong = '$soluong',
                 tinhtrang = '$tinhtrang',
                 sanpham_host = '$sanpham_host',
-                sapxepsp = '$sapxepsp',
+                sapxepsp = '$sapxepsp,
                 sanpham_gioithieu = '$sanpham_gioithieu',
                 sanpham_chitiet = '$sanpham_chitiet',
                 sanpham_baoquan = '$sanpham_baoquan'
